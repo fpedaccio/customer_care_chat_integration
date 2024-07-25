@@ -1,0 +1,18 @@
+### Send a message to Slack
+POST http://localhost:8000/send-message/
+Content-Type: application/json
+
+{
+    "channel": "#support-chat",
+    "message": "chau",
+    "username": "Test Bot",
+    "email": "facu@lol.com",
+    "id": "4"
+}
+
+
+### Get User Responses
+GET http://localhost:8000/responses/4/
+Content-Type: application/json
+
+# Set the user_id variable in the REST Client environment or replace {{user_id}} with an actual user ID.

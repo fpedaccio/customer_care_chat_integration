@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        #chat-container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        #message-container {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #fff;
+        }
+        .message {
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #e1f5fe;
+        }
+        .my-message {
+            text-align: right;
+            background-color: #c8e6c9;
+        }
+        #message-input {
+            width: calc(100% - 100px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #send-button {
+            width: 80px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #send-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="message-container"></div>
+    <input type="text" id="message-input" placeholder="Enter your message">
+    <button id="send-button">Send</button>
+</div>
+
+<script>
+    const userId = "your-user-id"; // Replace with actual user ID
+    const wsUrl = `ws://localhost:8000/ws/responses/6`;
+    const socket = new WebSocket(wsUrl);
+
+    const messageContainer = document.getElementById('message-container');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+
+    socket.onopen = function(event) {
+        console.log("WebSocket is open now.");
+    };
+
+    socket.onmessage = function(event) {
+        const messages = JSON.parse(event.data).responses;
+        messageContainer.innerHTML = '';
+        messages.forEach(message => {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.textContent = `${message.user}: ${message.text}`;
+            messageContainer.appendChild(messageElement);
+        });
+    };
+
+    socket.onclose = function(event) {
+        console.log("WebSocket is closed now.");
+    };
+
+    sendButton.onclick = function() {
+        const message = messageInput.value;
+        if (message) {
+            const messageData = {
+                channel: "#support-chat",  // Replace with actual channel ID
+                message: message,
+                username: "User",           // Replace with actual username
+                email: "user@example.com",  // Replace with actual email
+                id: "6"                  // Use the user ID variable
+            };
+            fetch("http://localhost:8000/send-message/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(messageData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'message my-message';
+                    messageElement.textContent = `Me: ${message}`;
+                    messageContainer.appendChild(messageElement);
+                    messageInput.value = '';
+                } else {
+                    alert("Failed to send message");
+                }
+            })
+            .catch(error => {
+                console.error("Error sending message:", error);
+            });
+        }
+    };
+</script>
+
+</body>
+</html>
