@@ -8,7 +8,7 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from datetime import datetime, timedelta
 from typing import List
-from settings import SLACK_TOKEN
+from settings import SLACK_TOKEN, HOURS_TO_LAST_MESSAGE
 
 # Create a new router instance
 router = APIRouter()
@@ -33,12 +33,12 @@ def get_username(user_id: str) -> str:
 async def send_message(slack_message: SlackMessage, db: Session = Depends(get_db)):
     try:
         # Calculate the timestamp for 6 hours ago
-        six_hours_ago = datetime.utcnow() - timedelta(hours=6)
+        hours_ago = datetime.utcnow() - timedelta(hours=HOURS_TO_LAST_MESSAGE)
 
         # Query for the most recent thread by this user within the last 6 hours
         recent_message = db.query(Messages).filter(
             Messages.user == slack_message.id,
-            Messages.created_at >= six_hours_ago
+            Messages.created_at >= hours_ago
         ).order_by(Messages.created_at.desc()).first()
 
         # Determine if we're replying to an existing thread or starting a new one

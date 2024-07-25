@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 SLACK_TOKEN = ""
 SQLALCHEMY_DATABASE_URL = ""
-
+HOURS_TO_LAST_MESSAGE = 6 # Number of hours to look back for recent messages
 
 # CORS configuration
 CORS_CONFIG = {
